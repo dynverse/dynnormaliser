@@ -1,4 +1,4 @@
-Package: normaliser
+Package: dynnormaliser
 Type: Package
 Title: Helper function for normalising counts data
 Version: 0.1.0

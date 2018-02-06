@@ -8,5 +8,5 @@
 #' @importFrom magrittr %<>% %$%
 #'
 #' @docType package
-#' @name normaliser
+#' @name dynnormaliser
 NULL

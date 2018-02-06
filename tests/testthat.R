@@ -1,5 +1,5 @@
 library(testthat)
-library(normaliser)
+library(dynnormaliser)
 
-test_check("normaliser")
+test_check("dynnormaliser")
 
