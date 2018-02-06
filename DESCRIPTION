@@ -29,4 +29,5 @@ Imports:
   tidyr,
   scater,
   scran,
+  Seurat,
   stats
