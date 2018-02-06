@@ -47,7 +47,9 @@ generate_prior_information <- function(milestone_ids, milestone_network, progres
 
   # marker genes
   if ("housekeeping" %in% colnames(feature_info)) {
-    marker_feature_ids <- feature_info %>% filter(!housekeeping) %>% pull(feature_id)
+    marker_feature_ids <- feature_info %>%
+      filter(!housekeeping) %>%
+      pull(feature_id)
   } else {
     ident <- grouping_assignment %>%
       slice(match(rownames(counts), cell_id)) %>%
