@@ -94,7 +94,7 @@ generate_prior_information <- function(milestone_ids, milestone_network, progres
     }
 
   # return output
-  :lst(
+  lst(
     start_milestones,
     start_cells,
     end_milestones,
