@@ -18,6 +18,7 @@
 #' @importFrom grDevices recordPlot graphics.off
 #' @importFrom limSolve lsei
 #' @importFrom stats sd
+#' @importFrom aroma.light aroma.light
 #'
 #' @export
 normalise_filter_counts <- function(
