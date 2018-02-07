@@ -9,6 +9,7 @@
 #' @param filter_hvg Whether to filter out highly variable genes
 #' @param hvg_fdr FDR gene filtering cutoff
 #' @param hvg_bio Biological gene filtering cutoff
+#' @param min_variable_fraction Minimal number of variable genes to retain
 #'
 #' @importFrom scater newSCESet calculateQCMetrics isOutlier normalise plotExplanatoryVariables plotExpression plotPCA plotQC nexprs
 #' @importFrom SingleCellExperiment isSpike SingleCellExperiment

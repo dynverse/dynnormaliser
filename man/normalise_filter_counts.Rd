@@ -7,7 +7,8 @@
 normalise_filter_counts(counts, has_spike = any(grepl("^ERCC",
   colnames(counts))), verbose = FALSE, nmads = 3,
   expressed_in_n_cells = 0.05, min_ave_expression = 0.05,
-  filter_hvg = TRUE, hvg_fdr = 0.05, hvg_bio = 0.5)
+  filter_hvg = TRUE, hvg_fdr = 0.05, hvg_bio = 0.5,
+  min_variable_fraction = 0.1)
 }
 \arguments{
 \item{counts}{The counts matrix, with genes in columns}
@@ -27,6 +28,8 @@ normalise_filter_counts(counts, has_spike = any(grepl("^ERCC",
 \item{hvg_fdr}{FDR gene filtering cutoff}
 
 \item{hvg_bio}{Biological gene filtering cutoff}
+
+\item{min_variable_fraction}{Minimal number of variable genes to retain}
 }
 \description{
 State-of-the-art preprocessing and normalisation from https://f1000research.com/articles/5-2122/v2 and https://www.bioconductor.org/help/workflows/simpleSingleCell/
