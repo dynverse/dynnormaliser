@@ -31,7 +31,7 @@ normalise_filter_counts <- function(
   filter_hvg = TRUE,
   hvg_fdr = 0.05,
   hvg_bio = 0.5,
-  min_variable_fraction = 0.25
+  min_variable_fraction = 0.1
 ) {
   if (verbose) {
     requireNamespace("grDevices")
