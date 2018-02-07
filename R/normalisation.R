@@ -30,7 +30,8 @@ normalise_filter_counts <- function(
   min_ave_expression = 0.05,
   filter_hvg = TRUE,
   hvg_fdr = 0.05,
-  hvg_bio = 0.5
+  hvg_bio = 0.5,
+  min_variable_fraction = 0.25
 ) {
   if (verbose) {
     requireNamespace("grDevices")
@@ -215,8 +216,11 @@ normalise_filter_counts <- function(
         ggplot2::geom_vline(xintercept = hvg_fdr)
     }
 
+    var_out <- var_out[order(var_out$bio, decreasing=TRUE),]
     hvg_out <- var_out[which(var_out$FDR <= hvg_fdr & var_out$bio >= hvg_bio),]
-    hvg_out <- hvg_out[order(hvg_out$bio, decreasing=TRUE),]
+    if(nrow(hvg_out) < min_variable_fraction * nrow(var_out)) {
+      hvg_out <- var_out[seq(1, ceiling(min_variable_fraction * nrow(var_out))), ]
+    }
 
     if (verbose & nrow(hvg_out) >= 10) {
       normalisation_plots$top_genes <- scater::plotExpression(sce_normalised, rownames(hvg_out)[1:10]) + fontsize
