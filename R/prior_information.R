@@ -42,7 +42,9 @@ generate_prior_information <- function(milestone_ids, milestone_network, progres
   if (length(end_cells) != length(end_milestones)) {warning("Not every end milestone has a cell")}
 
   # cell grouping
-  grouping_assignment <- get_cell_grouping(milestone_percentages)
+  grouping_assignment <- milestone_percentages %>%
+    group_by(cell_id) %>%
+    summarise(group_id = milestone_id[which.max(percentage)])
   grouping_network <- milestone_network %>% select(from, to)
 
   # marker genes
