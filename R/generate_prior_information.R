@@ -12,7 +12,15 @@
 #'
 #' @importFrom Seurat CreateSeuratObject FindAllMarkers
 #' @export
-generate_prior_information <- function(milestone_ids, milestone_network, progressions, milestone_percentages, counts, feature_info, cell_info) {
+generate_prior_information <- function(
+  milestone_ids,
+  milestone_network,
+  progressions,
+  milestone_percentages,
+  counts,
+  feature_info,
+  cell_info
+) {
   # start cells
   # check if there are one or more starting milestones
   start_milestones <- setdiff(milestone_ids, milestone_network$to)
