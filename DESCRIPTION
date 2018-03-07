@@ -16,7 +16,7 @@ Imports:
   Biobase,
   BiocGenerics,
   dplyr,
-  dynutils,
+  dynwrap,
   ggplot2,
   glue,
   grDevices,
@@ -33,4 +33,4 @@ Imports:
   Seurat,
   stats
 Remotes:
-  rcannood/dynutils
+  rcannood/dynwrap
