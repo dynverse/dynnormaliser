@@ -33,4 +33,4 @@ Imports:
   Seurat,
   stats
 Remotes:
-  rcannood/dynwrap
+  dynverse/dynwrap
