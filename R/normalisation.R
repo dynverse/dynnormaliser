@@ -258,30 +258,30 @@ normalise_filter_counts <- function(
     }
   }
 
-  expression_normalised_filtered <- Biobase::exprs(sce) %>% t()
-  counts_filtered <- counts[rownames(expression_normalised_filtered),colnames(expression_normalised_filtered)]
+  expr_norm_filt <- Biobase::exprs(sce) %>% Matrix::t()
+  counts_filt <- counts[rownames(expr_norm_filt),colnames(expr_norm_filt)]
 
   ########################################
-  # Final filter on variability
+  # Iterative filtering on variability
   ########################################
   repeat {
-    gene_sds <- counts_filtered %>% apply(2, stats::sd)
-    cell_sds <- counts_filtered %>% apply(1, stats::sd)
+    gene_sds <- counts_filt %>% apply(2, stats::sd)
+    cell_sds <- counts_filt %>% apply(1, stats::sd)
 
-    genes_filtered <- which(gene_sds > 0, useNames=TRUE)
-    cells_filtered <- which(cell_sds > 0, useNames=TRUE)
-    expression_normalised_filtered <- expression_normalised_filtered[cells_filtered, genes_filtered]
-    counts_filtered <- counts_filtered[cells_filtered, genes_filtered]
+    genes_filtered <- which(gene_sds > 0, useNames = TRUE)
+    cells_filtered <- which(cell_sds > 0, useNames = TRUE)
+    expr_norm_filt <- expr_norm_filt[cells_filtered, genes_filtered]
+    counts_filt <- counts_filt[cells_filtered, genes_filtered]
 
-    if((min(c(gene_sds, 1), na.rm=TRUE) > 0) && (min(c(cell_sds, 1), na.rm=TRUE) > 0)){
+    if((min(c(gene_sds, 1), na.rm = TRUE) > 0) && (min(c(cell_sds, 1), na.rm = TRUE) > 0)){
       break
     }
   }
 
   if (verbose) {
     normalisation_steps <- normalisation_steps %>%
-      add_row(type = "final_filtering", ngenes = dim(expression_normalised_filtered)[1], ncells = dim(expression_normalised_filtered)[2])
-    print(glue::glue("Final filtering: Genes - {dim(expression_normalised_filtered)[[1]]} Cells - {dim(expression_normalised_filtered)[[2]]}"))
+      add_row(type = "final_filtering", ngenes = dim(expr_norm_filt)[1], ncells = dim(expr_norm_filt)[2])
+    print(glue::glue("Final filtering: Genes - {dim(expr_norm_filt)[[1]]} Cells - {dim(expr_norm_filt)[[2]]}"))
   }
 
   ########################################
@@ -291,7 +291,8 @@ normalise_filter_counts <- function(
   if(verbose) {
     type <- NULL # satisfy r cmd check
 
-    normalisation_plots$n_retained <- normalisation_steps %>%
+    normalisation_plots$n_retained <-
+      normalisation_steps %>%
       mutate(type = factor(type, levels=rev(type))) %>%
       gather("dimension", "n", -type) %>%
       ggplot2::ggplot() +
@@ -303,8 +304,8 @@ normalise_filter_counts <- function(
   }
 
   lst(
-    expression = expression_normalised_filtered,
-    counts = counts_filtered,
+    expression = expr_norm_filt,
+    counts = counts_filt,
     normalisation_plots,
     info = lst(
       has_spike,
