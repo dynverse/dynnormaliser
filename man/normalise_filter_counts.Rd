@@ -2,7 +2,7 @@
 % Please edit documentation in R/normalisation.R
 \name{normalise_filter_counts}
 \alias{normalise_filter_counts}
-\title{State-of-the-art preprocessing and normalisation from https://f1000research.com/articles/5-2122/v2 and https://www.bioconductor.org/help/workflows/simpleSingleCell/}
+\title{State-of-the-art preprocessing and normalisation}
 \usage{
 normalise_filter_counts(counts, has_spike = any(grepl("^ERCC",
   colnames(counts))), verbose = FALSE, nmads = 3,
@@ -32,5 +32,5 @@ normalise_filter_counts(counts, has_spike = any(grepl("^ERCC",
 \item{min_variable_fraction}{Minimal number of variable genes to retain}
 }
 \description{
-State-of-the-art preprocessing and normalisation from https://f1000research.com/articles/5-2122/v2 and https://www.bioconductor.org/help/workflows/simpleSingleCell/
+Based on \url{https://f1000research.com/articles/5-2122/v2} and \url{https://www.bioconductor.org/help/workflows/simpleSingleCell/}.
 }

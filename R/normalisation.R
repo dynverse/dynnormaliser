@@ -1,5 +1,9 @@
 # lsei import is for scran
-#' State-of-the-art preprocessing and normalisation from https://f1000research.com/articles/5-2122/v2 and https://www.bioconductor.org/help/workflows/simpleSingleCell/
+
+#' State-of-the-art preprocessing and normalisation
+#'
+#' Based on \url{https://f1000research.com/articles/5-2122/v2} and \url{https://www.bioconductor.org/help/workflows/simpleSingleCell/}.
+#'
 #' @param counts The counts matrix, with genes in columns
 #' @param has_spike Does this contain spike-ins, for which the gene names are preseded by ERCC
 #' @param verbose Whether to add plots
