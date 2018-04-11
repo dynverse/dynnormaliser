@@ -71,6 +71,14 @@ normalise_filter_counts <- function(
   }
 
   if (verbose) {
+    normalisation_steps <- tribble(
+      ~type, ~ngenes, ~ncells,
+      "original", dim(sce)[1], dim(sce)[2]
+    )
+    print(glue::glue("Original: Genes - {dim(sce)[[1]]} Cells - {dim(sce)[[2]]}"))
+  }
+
+  if (verbose) {
     graphics::par(mfrow=c(1,2))
     graphics::hist(sce$total_counts/1e6, xlab="Library sizes (millions)", main="",
                    breaks=20, col="grey80", ylab="Number of cells")
@@ -92,8 +100,6 @@ normalise_filter_counts <- function(
                                  ylab="Number of cells", breaks=20, main="", col="grey80")
     graphics::par(mfrow=c(1, 1))
     normalisation_plots$cell_quality <- grDevices::recordPlot()
-
-    print(glue::glue("Original: Genes - {dim(sce)[[1]]} Cells - {dim(sce)[[2]]}"))
   }
 
   ########################################
@@ -156,7 +162,11 @@ normalise_filter_counts <- function(
 
   sce_cellgene_filtered <- sce_cell_filtered[keep,]
 
-  if (verbose)print(glue::glue("Gene filter: Genes - {dim(sce_cellgene_filtered)[[1]]} Cells - {dim(sce_cellgene_filtered)[[2]]}"))
+  if (verbose) {
+    normalisation_steps <- normalisation_steps %>%
+      add_row(type = "gene_expression_filtering", ngenes = dim(sce_cellgene_filtered)[1], ncells = dim(sce_cellgene_filtered)[2])
+    print(glue::glue("Gene filter: Genes - {dim(sce_cellgene_filtered)[[1]]} Cells - {dim(sce_cellgene_filtered)[[2]]}"))
+  }
 
   ########################################
   # Normalise
@@ -168,7 +178,7 @@ normalise_filter_counts <- function(
     sizes <- ncol(sce_cellgene_filtered)
   }
 
-  sce_cellgene_filtered <- scran::computeSumFactors(sce_cellgene_filtered, sizes=sizes, positive=TRUE)
+  sce_cellgene_filtered <- scran::computeSumFactors(sce_cellgene_filtered, sizes = sizes, positive = TRUE)
   sce_cellgene_filtered <- sce_cellgene_filtered[, sizeFactors(sce_cellgene_filtered) > 0] # as mentioned in the scran documentation, ensure that size factors are higher than 0
 
   if (verbose) {
@@ -186,7 +196,11 @@ normalise_filter_counts <- function(
 
   sce_normalised <- scater::normalise(sce_cellgene_filtered)
 
-  if (verbose)print(glue::glue("normalised: Genes - {dim(sce_normalised)[[1]]} Cells - {dim(sce_normalised)[[2]]}"))
+  if (verbose) {
+    normalisation_steps <- normalisation_steps %>%
+      add_row(type = "normalisation", ngenes = dim(sce_normalised)[1], ncells = dim(sce_normalised)[2])
+    print(glue::glue("Normalised: Genes - {dim(sce_normalised)[[1]]} Cells - {dim(sce_normalised)[[2]]}"))
+  }
 
   ########################################
   # Select highly variable genes
@@ -236,7 +250,11 @@ normalise_filter_counts <- function(
     }
     sce_normalised_filtered <- sce_normalised[rownames(hvg_out),]
 
-    if (verbose) print(glue::glue("Variable genes filtered: Genes - {dim(sce_normalised_filtered)[[1]]} Cells - {dim(sce_normalised_filtered)[[2]]}"))
+    if (verbose) {
+      normalisation_steps <- normalisation_steps %>%
+        add_row(type = "gene_variability_filtering", ngenes = dim(sce_normalised_filtered)[1], ncells = dim(sce_normalised_filtered)[2])
+      print(glue::glue("Variable genes filtered: Genes - {dim(sce_normalised_filtered)[[1]]} Cells - {dim(sce_normalised_filtered)[[2]]}"))
+    }
   } else {
     sce_normalised_filtered <- sce_normalised
   }
@@ -261,6 +279,12 @@ normalise_filter_counts <- function(
     }
   }
 
+  if (verbose) {
+    normalisation_steps <- normalisation_steps %>%
+      add_row(type = "final_filtering", ngenes = dim(expression_normalised_filtered)[1], ncells = dim(expression_normalised_filtered)[2])
+    print(glue::glue("Final filtering: Genes - {dim(expression_normalised_filtered)[[1]]} Cells - {dim(expression_normalised_filtered)[[2]]}"))
+  }
+
   ########################################
   # Output
   ########################################
@@ -268,15 +292,6 @@ normalise_filter_counts <- function(
   if(verbose) {
     type <- NULL # satisfy r cmd check
 
-    normalisation_steps <-tribble(
-      ~type, ~ngenes, ~ncells,
-      "original", dim(sce)[1], dim(sce)[2],
-      "cell_quality_filtering", dim(sce_cell_filtered)[1], dim(sce_cell_filtered)[2],
-      "gene_expression_filtering", dim(sce_cellgene_filtered)[1], dim(sce_cellgene_filtered)[2],
-      "normalisation", dim(sce_normalised)[1], dim(sce_normalised)[2],
-      "gene_variability_filtering", dim(sce_normalised_filtered)[1], dim(sce_normalised_filtered)[2],
-      "final_filtering", dim(expression_normalised_filtered)[2], dim(expression_normalised_filtered)[1]
-    )
     normalisation_plots$n_retained <- normalisation_steps %>%
       mutate(type = factor(type, levels=rev(type))) %>%
       gather("dimension", "n", -type) %>%
