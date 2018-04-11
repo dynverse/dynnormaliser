@@ -117,19 +117,19 @@ normalise_filter_counts <- function(
     tibble(sum(mito_drop), sum(spike_drop), sum(libsize_drop), sum(feature_drop)) %>% print()
   }
 
-  sce_cell_filtered <- sce[,!(libsize_drop | feature_drop | mito_drop | spike_drop)]
+  sce <- sce[,!(libsize_drop | feature_drop | mito_drop | spike_drop)]
 
   if (verbose) {
     normalisation_steps <- normalisation_steps %>%
-      add_row(type = "cell_quality_filtering", ngenes = dim(sce_cell_filtered)[1], ncells = dim(sce_cell_filtered)[2])
-    print(glue::glue("Cell filter: Genes - {dim(sce_cell_filtered)[[1]]} Cells - {dim(sce_cell_filtered)[[2]]}"))
+      add_row(type = "cell_quality_filtering", ngenes = dim(sce)[1], ncells = dim(sce)[2])
+    print(glue::glue("Cell filter: Genes - {dim(sce)[[1]]} Cells - {dim(sce)[[2]]}"))
   }
 
   ########################################
   # Filter genes
   ########################################
 
-  ave_counts <- Matrix::rowMeans(BiocGenerics::counts(sce_cell_filtered))
+  ave_counts <- Matrix::rowMeans(BiocGenerics::counts(sce))
   keep <- ave_counts >= min_ave_expression
 
   if (verbose) {
@@ -143,63 +143,64 @@ normalise_filter_counts <- function(
     graphics::abline(v=log10(min_ave_expression), col="blue", lwd=2, lty=2)
     normalisation_plots$initial_gene_filter <- grDevices::recordPlot()
 
-    print(scater::plotQC(sce_cell_filtered, type = "highest-expression", n=50) + fontsize)
+    print(scater::plotQC(sce, type = "highest-expression", n=50) + fontsize)
     normalisation_plots$top_genes_qc <- grDevices::recordPlot()
   }
 
-  numcells <- scater::nexprs(sce_cell_filtered, byrow=TRUE)
-  alt_keep <- numcells >= ncol(sce_cell_filtered) * expressed_in_n_cells
+  numcells <- scater::nexprs(sce, byrow=TRUE)
+  alt_keep <- numcells >= ncol(sce) * expressed_in_n_cells
 
   if (verbose) {
     graphics::smoothScatter(log10(ave_counts), numcells, xlab=expression(Log[10]~"average count"), ylab="Number of expressing cells")
     if (has_spike) {
-      is_ercc <- SingleCellExperiment::isSpike(sce_cell_filtered, type="ERCC")
+      is_ercc <- SingleCellExperiment::isSpike(sce, type="ERCC")
       graphics::points(log10(ave_counts[is_ercc]), numcells[is_ercc], col="red", pch=16, cex=0.5)
     }
 
     normalisation_plots$cell_filtering <- grDevices::recordPlot()
   }
 
-  sce_cellgene_filtered <- sce_cell_filtered[keep,]
+  sce <- sce[keep,]
 
   if (verbose) {
     normalisation_steps <- normalisation_steps %>%
-      add_row(type = "gene_expression_filtering", ngenes = dim(sce_cellgene_filtered)[1], ncells = dim(sce_cellgene_filtered)[2])
-    print(glue::glue("Gene filter: Genes - {dim(sce_cellgene_filtered)[[1]]} Cells - {dim(sce_cellgene_filtered)[[2]]}"))
+      add_row(type = "gene_expression_filtering", ngenes = dim(sce)[1], ncells = dim(sce)[2])
+    print(glue::glue("Gene filter: Genes - {dim(sce)[[1]]} Cells - {dim(sce)[[2]]}"))
   }
 
   ########################################
   # Normalise
   ########################################
 
-  if (ncol(sce_cellgene_filtered) >= 100) {
-    sizes <- c(20, 40, 60, 80)
+  if (ncol(sce) >= 100) {
+    # sizes <- c(20, 40, 60, 80)
+    sizes <- ncol(sce) / 10
   } else {
-    sizes <- ncol(sce_cellgene_filtered)
+    sizes <- ncol(sce)
   }
 
-  sce_cellgene_filtered <- scran::computeSumFactors(sce_cellgene_filtered, sizes = sizes, positive = TRUE)
-  sce_cellgene_filtered <- sce_cellgene_filtered[, sizeFactors(sce_cellgene_filtered) > 0] # as mentioned in the scran documentation, ensure that size factors are higher than 0
+  sce <- scran::computeSumFactors(sce, sizes = sizes, positive = TRUE)
+  sce <- sce[, sizeFactors(sce) > 0] # as mentioned in the scran documentation, ensure that size factors are higher than 0
 
   if (verbose) {
-    graphics::plot(sizeFactors(sce_cellgene_filtered), sce_cellgene_filtered$total_counts/1e6, log="xy",
+    graphics::plot(sizeFactors(sce), sce$total_counts/1e6, log="xy",
                    ylab="Library size (millions)", xlab="Size factor")
     normalisation_plots$size_factor <- grDevices::recordPlot()
   }
 
   if(has_spike) {
-    sce_cellgene_filtered <- scran::computeSpikeFactors(sce_cellgene_filtered, type="ERCC", general.use=FALSE)
-    if(any(is.na(sizeFactors(sce_cellgene_filtered, type="ERCC")))) {
+    sce <- scran::computeSpikeFactors(sce, type="ERCC", general.use=FALSE)
+    if(any(is.na(sizeFactors(sce, type="ERCC")))) {
       warning("Some cells do not have any spike-ins, this will cause an error further away. Remove spike-ins.")
     }
   }
 
-  sce_normalised <- scater::normalise(sce_cellgene_filtered)
+  sce <- scater::normalise(sce)
 
   if (verbose) {
     normalisation_steps <- normalisation_steps %>%
-      add_row(type = "normalisation", ngenes = dim(sce_normalised)[1], ncells = dim(sce_normalised)[2])
-    print(glue::glue("Normalised: Genes - {dim(sce_normalised)[[1]]} Cells - {dim(sce_normalised)[[2]]}"))
+      add_row(type = "normalisation", ngenes = dim(sce)[1], ncells = dim(sce)[2])
+    print(glue::glue("Normalised: Genes - {dim(sce)[[1]]} Cells - {dim(sce)[[2]]}"))
   }
 
   ########################################
@@ -210,13 +211,13 @@ normalise_filter_counts <- function(
     if (verbose) {
       if(has_spike) {
         normalisation_plots$ercc <-
-          scater::plotExplanatoryVariables(sce_normalised, variables=c("total_counts_ERCC", "log10_total_counts_ERCC")) +
+          scater::plotExplanatoryVariables(sce, variables=c("total_counts_ERCC", "log10_total_counts_ERCC")) +
           fontsize
       }
     }
 
-    var_fit <- scran::trendVar(sce_normalised, method="spline", use.spikes=has_spike) # requires aroma.light
-    var_out <- scran::decomposeVar(sce_normalised, var_fit)
+    var_fit <- scran::trendVar(sce, method="spline", use.spikes=has_spike) # requires aroma.light
+    var_out <- scran::decomposeVar(sce, var_fit)
 
     if (verbose) {
       graphics::plot(var_out$mean, var_out$total, pch=16, cex=0.6, xlab="Mean log-expression",
@@ -245,21 +246,19 @@ normalise_filter_counts <- function(
     }
 
     if (verbose & nrow(hvg_out) >= 10) {
-      normalisation_plots$top_genes <- scater::plotExpression(sce_normalised, rownames(hvg_out)[1:10]) + fontsize
-      normalisation_plots$bottom_genes <- scater::plotExpression(sce_normalised, rownames(hvg_out)[(nrow(hvg_out)-10):nrow(hvg_out)]) + fontsize
+      normalisation_plots$top_genes <- scater::plotExpression(sce, rownames(hvg_out)[1:10]) + fontsize
+      normalisation_plots$bottom_genes <- scater::plotExpression(sce, rownames(hvg_out)[(nrow(hvg_out)-10):nrow(hvg_out)]) + fontsize
     }
-    sce_normalised_filtered <- sce_normalised[rownames(hvg_out),]
+    sce <- sce[rownames(hvg_out),]
 
     if (verbose) {
       normalisation_steps <- normalisation_steps %>%
-        add_row(type = "gene_variability_filtering", ngenes = dim(sce_normalised_filtered)[1], ncells = dim(sce_normalised_filtered)[2])
-      print(glue::glue("Variable genes filtered: Genes - {dim(sce_normalised_filtered)[[1]]} Cells - {dim(sce_normalised_filtered)[[2]]}"))
+        add_row(type = "gene_variability_filtering", ngenes = dim(sce)[1], ncells = dim(sce)[2])
+      print(glue::glue("Variable genes filtered: Genes - {dim(sce)[[1]]} Cells - {dim(sce)[[2]]}"))
     }
-  } else {
-    sce_normalised_filtered <- sce_normalised
   }
 
-  expression_normalised_filtered <- Biobase::exprs(sce_normalised_filtered) %>% t()
+  expression_normalised_filtered <- Biobase::exprs(sce) %>% t()
   counts_filtered <- counts[rownames(expression_normalised_filtered),colnames(expression_normalised_filtered)]
 
   ########################################
