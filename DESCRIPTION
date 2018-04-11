@@ -22,6 +22,7 @@ Imports:
   grDevices,
   limSolve,
   magrittr,
+  Matrix,
   methods,
   purrr,
   SingleCellExperiment,

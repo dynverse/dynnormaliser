@@ -15,6 +15,7 @@
 #' @param hvg_bio Biological gene filtering cutoff
 #' @param min_variable_fraction Minimal number of variable genes to retain
 #'
+#' @importFrom Matrix t rowMeans
 #' @importFrom scater newSCESet calculateQCMetrics isOutlier normalise plotExplanatoryVariables plotExpression plotPCA plotQC nexprs
 #' @importFrom SingleCellExperiment isSpike SingleCellExperiment
 #' @importFrom BiocGenerics counts sizeFactors
@@ -53,7 +54,7 @@ normalise_filter_counts <- function(
 
   counts <- round(counts)
 
-  sce <- SingleCellExperiment::SingleCellExperiment(list(counts=t(counts)))
+  sce <- SingleCellExperiment::SingleCellExperiment(list(counts=Matrix::t(counts)))
 
   mitochondrial <- grepl("^(mt|MT|mt)-", rownames(sce))
   has_mito <- any(mitochondrial)
@@ -113,6 +114,8 @@ normalise_filter_counts <- function(
   sce_cell_filtered <- sce[,!(libsize_drop | feature_drop | mito_drop | spike_drop)]
 
   if (verbose) {
+    normalisation_steps <- normalisation_steps %>%
+      add_row(type = "cell_quality_filtering", ngenes = dim(sce_cell_filtered)[1], ncells = dim(sce_cell_filtered)[2])
     print(glue::glue("Cell filter: Genes - {dim(sce_cell_filtered)[[1]]} Cells - {dim(sce_cell_filtered)[[2]]}"))
   }
 
@@ -120,7 +123,7 @@ normalise_filter_counts <- function(
   # Filter genes
   ########################################
 
-  ave_counts <- rowMeans(BiocGenerics::counts(sce_cell_filtered))
+  ave_counts <- Matrix::rowMeans(BiocGenerics::counts(sce_cell_filtered))
   keep <- ave_counts >= min_ave_expression
 
   if (verbose) {
