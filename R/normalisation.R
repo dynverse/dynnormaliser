@@ -16,7 +16,7 @@
 #' @param min_variable_fraction Minimal number of variable genes to retain
 #'
 #' @importFrom Matrix t rowMeans
-#' @importFrom scater newSCESet calculateQCMetrics isOutlier normalise plotExplanatoryVariables plotExpression plotPCA plotQC nexprs
+#' @importFrom scater calculateQCMetrics isOutlier normalise plotExplanatoryVariables plotExpression plotQC nexprs
 #' @importFrom SingleCellExperiment isSpike SingleCellExperiment
 #' @importFrom BiocGenerics counts sizeFactors
 #' @importFrom Biobase pData
