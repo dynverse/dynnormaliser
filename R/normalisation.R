@@ -11,7 +11,7 @@
 #' @param hvg_bio Biological gene filtering cutoff
 #' @param min_variable_fraction Minimal number of variable genes to retain
 #'
-#' @importFrom scater newSCESet calculateQCMetrics isOutlier normalise plotExplanatoryVariables plotExpression plotPCA plotQC nexprs
+#' @importFrom scater calculateQCMetrics isOutlier normalise plotExplanatoryVariables plotExpression plotPCA plotQC nexprs
 #' @importFrom SingleCellExperiment isSpike SingleCellExperiment
 #' @importFrom BiocGenerics counts sizeFactors
 #' @importFrom Biobase pData
