@@ -73,9 +73,9 @@ normalise_filter_counts <- function(
   if (verbose) {
     normalisation_steps <- tribble(
       ~type, ~ngenes, ~ncells,
-      "original", dim(sce)[1], dim(sce)[2]
+      "original", nrow(sce), ncol(sce)
     )
-    print(glue::glue("Original: Genes - {dim(sce)[[1]]} Cells - {dim(sce)[[2]]}"))
+    print(glue::glue("Original: Genes - {nrow(sce)} Cells - {ncol(sce)}"))
   }
 
   if (verbose) {
@@ -121,8 +121,8 @@ normalise_filter_counts <- function(
 
   if (verbose) {
     normalisation_steps <- normalisation_steps %>%
-      add_row(type = "cell_quality_filtering", ngenes = dim(sce)[1], ncells = dim(sce)[2])
-    print(glue::glue("Cell filter: Genes - {dim(sce)[[1]]} Cells - {dim(sce)[[2]]}"))
+      add_row(type = "cell_quality_filtering", ngenes = nrow(sce), ncells = ncol(sce))
+    print(glue::glue("Cell filter: Genes - {nrow(sce)} Cells - {ncol(sce)}"))
   }
 
   ########################################
@@ -164,8 +164,8 @@ normalise_filter_counts <- function(
 
   if (verbose) {
     normalisation_steps <- normalisation_steps %>%
-      add_row(type = "gene_expression_filtering", ngenes = dim(sce)[1], ncells = dim(sce)[2])
-    print(glue::glue("Gene filter: Genes - {dim(sce)[[1]]} Cells - {dim(sce)[[2]]}"))
+      add_row(type = "gene_expression_filtering", ngenes = nrow(sce), ncells = ncol(sce))
+    print(glue::glue("Gene filter: Genes - {nrow(sce)} Cells - {ncol(sce)}"))
   }
 
   ########################################
@@ -199,8 +199,8 @@ normalise_filter_counts <- function(
 
   if (verbose) {
     normalisation_steps <- normalisation_steps %>%
-      add_row(type = "normalisation", ngenes = dim(sce)[1], ncells = dim(sce)[2])
-    print(glue::glue("Normalised: Genes - {dim(sce)[[1]]} Cells - {dim(sce)[[2]]}"))
+      add_row(type = "normalisation", ngenes = nrow(sce), ncells = ncol(sce))
+    print(glue::glue("Normalised: Genes - {nrow(sce)} Cells - {ncol(sce)}"))
   }
 
   ########################################
@@ -253,8 +253,8 @@ normalise_filter_counts <- function(
 
     if (verbose) {
       normalisation_steps <- normalisation_steps %>%
-        add_row(type = "gene_variability_filtering", ngenes = dim(sce)[1], ncells = dim(sce)[2])
-      print(glue::glue("Variable genes filtered: Genes - {dim(sce)[[1]]} Cells - {dim(sce)[[2]]}"))
+        add_row(type = "gene_variability_filtering", ngenes = nrow(sce), ncells = ncol(sce))
+      print(glue::glue("Variable genes filtered: Genes - {nrow(sce)} Cells - {ncol(sce)}"))
     }
   }
 
@@ -280,8 +280,8 @@ normalise_filter_counts <- function(
 
   if (verbose) {
     normalisation_steps <- normalisation_steps %>%
-      add_row(type = "final_filtering", ngenes = dim(expr_norm_filt)[1], ncells = dim(expr_norm_filt)[2])
-    print(glue::glue("Final filtering: Genes - {dim(expr_norm_filt)[[1]]} Cells - {dim(expr_norm_filt)[[2]]}"))
+      add_row(type = "final_filtering", ngenes = ncol(expr_norm_filt), ncells = nrow(expr_norm_filt))
+    print(glue::glue("Final filtering: Genes - {ncol(expr_norm_filt)} Cells - {nrow(expr_norm_filt)}"))
   }
 
   ########################################
