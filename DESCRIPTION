@@ -16,7 +16,6 @@ Imports:
   Biobase,
   BiocGenerics,
   dplyr,
-  dynwrap,
   ggplot2,
   glue,
   grDevices,
@@ -31,7 +30,4 @@ Imports:
   tidyr,
   scater,
   scran,
-  Seurat,
   stats
-Remotes:
-  dynverse/dynwrap
