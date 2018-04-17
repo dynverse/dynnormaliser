@@ -16,9 +16,7 @@ Imports:
   Biobase,
   BiocGenerics,
   dplyr,
-  ggplot2,
   glue,
-  grDevices,
   limSolve,
   magrittr,
   Matrix,
@@ -31,3 +29,9 @@ Imports:
   scater,
   scran,
   stats
+Suggested:
+  cowplot,
+  graphics,
+  ggplot2,
+  grDevices,
+  KernSmooth

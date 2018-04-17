@@ -21,7 +21,6 @@
 #' @importFrom BiocGenerics counts sizeFactors
 #' @importFrom Biobase pData
 #' @importFrom scran computeSumFactors computeSpikeFactors trendVar decomposeVar
-#' @importFrom grDevices recordPlot graphics.off
 #' @importFrom limSolve lsei
 #' @importFrom stats sd
 #' @importFrom aroma.light aroma.light
