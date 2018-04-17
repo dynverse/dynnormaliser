@@ -56,7 +56,7 @@ normalise_filter_counts <- function(
 
   sce <- SingleCellExperiment::SingleCellExperiment(list(counts=Matrix::t(counts)))
 
-  mitochondrial <- grepl("^(mt|MT|mt)-", rownames(sce))
+  mitochondrial <- grepl("^(mt|MT|Mt)-", rownames(sce))
   has_mito <- any(mitochondrial)
   feature_controls <- list()
   if (has_mito) feature_controls$Mt <- mitochondrial
