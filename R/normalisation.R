@@ -24,7 +24,6 @@
 #' @importFrom limSolve lsei
 #' @importFrom stats sd
 #' @importFrom aroma.light aroma.light
-#'
 #' @export
 normalise_filter_counts <- function(
   counts,
@@ -42,6 +41,7 @@ normalise_filter_counts <- function(
     requireNamespace("grDevices")
     requireNamespace("ggplot2")
     requireNamespace("graphics")
+    requireNamespace("KernSmooth")
   }
 
 

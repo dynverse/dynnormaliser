@@ -15,6 +15,7 @@ Imports:
   aroma.light,
   Biobase,
   BiocGenerics,
+  ggplot2,
   dplyr,
   glue,
   limSolve,
@@ -28,10 +29,9 @@ Imports:
   tidyr,
   scater,
   scran,
-  stats
+  stats,
+  KernSmooth
 Suggested:
   cowplot,
   graphics,
-  ggplot2,
-  grDevices,
-  KernSmooth
+  grDevices
