@@ -209,11 +209,12 @@ normalise_filter_counts <- function(
 
   if (filter_hvg) {
     if (verbose) {
-      if(has_spike) {
-        normalisation_plots$ercc <-
-          scater::plotExplanatoryVariables(sce, variables=c("total_counts_ERCC", "log10_total_counts_ERCC")) +
-          fontsize
-      }
+      # crashes with 'invalid number of intervals'
+      # if(has_spike) {
+      #   normalisation_plots$ercc <-
+      #     scater::plotExplanatoryVariables(sce, variables=c("total_counts_ERCC", "log10_total_counts_ERCC")) +
+      #     fontsize
+      # }
     }
 
     var_fit <- scran::trendVar(sce, method="spline", use.spikes=has_spike) # requires aroma.light
