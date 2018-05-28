@@ -223,6 +223,7 @@ normalise_filter_counts <- function(
       normalisation_plots$gene_variance <- grDevices::recordPlot()
 
       normalisation_plots$gene_selection <- var_out %>%
+        as("data.frame") %>%
         ggplot2::ggplot() +
         ggplot2::geom_point(ggplot2::aes_string("FDR", "bio")) +
         ggplot2::geom_hline(yintercept = hvg_bio) +
