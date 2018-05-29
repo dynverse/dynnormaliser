@@ -1,8 +1,8 @@
 context("Normalisation")
 
 test_that("Testing normalise function", {
-  num_genes <- 100
-  num_cells <- 60
+  num_genes <- 1000
+  num_cells <- 1000
 
   gene_ids <- paste0("Gene", seq_len(num_genes))
   gene_ids[1:4] <- paste0("ERCC", seq_len(4))
