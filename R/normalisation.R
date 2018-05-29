@@ -44,7 +44,6 @@ normalise_filter_counts <- function(
     requireNamespace("KernSmooth")
   }
 
-
   normalisation_plots <- list()
 
   ########################################
@@ -207,15 +206,6 @@ normalise_filter_counts <- function(
   ########################################
 
   if (filter_hvg) {
-    if (verbose) {
-      # crashes with 'invalid number of intervals'
-      # if(has_spike) {
-      #   normalisation_plots$ercc <-
-      #     scater::plotExplanatoryVariables(sce, variables=c("total_counts_ERCC", "log10_total_counts_ERCC")) +
-      #     fontsize
-      # }
-    }
-
     var_fit <- scran::trendVar(sce, method="spline", use.spikes=has_spike) # requires aroma.light
     var_out <- scran::decomposeVar(sce, var_fit)
 
@@ -233,6 +223,7 @@ normalise_filter_counts <- function(
       normalisation_plots$gene_variance <- grDevices::recordPlot()
 
       normalisation_plots$gene_selection <- var_out %>%
+        as("data.frame") %>%
         ggplot2::ggplot() +
         ggplot2::geom_point(ggplot2::aes_string("FDR", "bio")) +
         ggplot2::geom_hline(yintercept = hvg_bio) +
@@ -245,10 +236,11 @@ normalise_filter_counts <- function(
       hvg_out <- var_out[seq(1, ceiling(min_variable_fraction * nrow(var_out))), ]
     }
 
-    if (verbose & nrow(hvg_out) >= 10) {
-      normalisation_plots$top_genes <- scater::plotExpression(sce, rownames(hvg_out)[1:10]) + fontsize
-      normalisation_plots$bottom_genes <- scater::plotExpression(sce, rownames(hvg_out)[(nrow(hvg_out)-10):nrow(hvg_out)]) + fontsize
-    }
+    # errors
+    # if (verbose & nrow(hvg_out) >= 10) {
+    #   normalisation_plots$top_genes <- scater::plotExpression(sce, rownames(hvg_out)[1:10]) + fontsize
+    #   normalisation_plots$bottom_genes <- scater::plotExpression(sce, rownames(hvg_out)[(nrow(hvg_out)-10):nrow(hvg_out)]) + fontsize
+    # }
     sce <- sce[rownames(hvg_out),]
 
     if (verbose) {
