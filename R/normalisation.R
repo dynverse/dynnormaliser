@@ -60,7 +60,7 @@ normalise_filter_counts <- function(
   if (has_mito) feature_controls$Mt <- mitochondrial
   if (has_spike) feature_controls$ERCC <- grepl("^ERCC", rownames(sce))
 
-  sce <- scater::calculateQCMetrics(sce, feature_controls = feature_controls)
+  sce <- scater::calculateQCMetrics(sce, feature_controls = feature_controls, compact = TRUE)
 
   if (has_spike) {
     is_spike <- grepl("^ERCC", rownames(sce))
@@ -103,13 +103,18 @@ normalise_filter_counts <- function(
   ########################################
   # Filter cells
   ########################################
-  mito_drop <- rep(FALSE, length(sce$total_counts))
-  spike_drop <- rep(FALSE, length(sce$total_counts))
+  total_counts <- sce$scater_qc$all$log10_total_counts
+  total_features <- sce$scater_qc$all$log10_total_features_by_counts
+  pct_counts_Mt <- sce$scater_qc$feature_control_Mt$pct_counts
+  pct_counts_ERCC <- sce$scater_qc$feature_control_ERCC$pct_counts
 
-  libsize_drop <- scater::isOutlier(sce$total_counts, nmads=nmads, type="lower", log=TRUE)
-  feature_drop <- scater::isOutlier(sce$total_features, nmads=nmads, type="lower", log=TRUE)
-  if (has_mito) mito_drop <- scater::isOutlier(sce$pct_counts_Mt, nmads=nmads, type="higher")
-  if (has_spike) spike_drop <- scater::isOutlier(sce$pct_counts_ERCC, nmads=nmads, type="higher")
+  mito_drop <- rep(FALSE, length(total_counts))
+  spike_drop <- rep(FALSE, length(total_counts))
+
+  libsize_drop <- scater::isOutlier(total_counts, nmads=nmads, type="lower", log=TRUE)
+  feature_drop <- scater::isOutlier(total_features, nmads=nmads, type="lower", log=TRUE)
+  if (has_mito) mito_drop <- scater::isOutlier(pct_counts_Mt, nmads=nmads, type="higher")
+  if (has_spike) spike_drop <- scater::isOutlier(pct_counts_ERCC, nmads=nmads, type="higher")
 
   if (verbose) {
     tibble(sum(mito_drop), sum(spike_drop), sum(libsize_drop), sum(feature_drop)) %>% print()
@@ -178,7 +183,7 @@ normalise_filter_counts <- function(
   }
 
   sce <- scran::computeSumFactors(sce, sizes = sizes, positive = TRUE)
-  sce <- sce[, sizeFactors(sce) > 0] # as mentioned in the scran documentation, ensure that size factors are higher than 0
+  sce <- sce[, BiocGenerics::sizeFactors(sce) > 0] # as mentioned in the scran documentation, ensure that size factors are higher than 0
 
   if (verbose) {
     graphics::plot(sizeFactors(sce), sce$total_counts/1e6, log="xy",
