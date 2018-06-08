@@ -10,7 +10,7 @@ test_that("Testing normalise function", {
   cell_ids <- paste0("Cell", seq_len(num_cells))
 
   counts <- matrix(round(2^rnorm(num_genes * num_cells, mean = 6, sd = 2)), ncol = num_genes, dimnames = list(cell_ids, gene_ids))
-  counts[sample(c(T, F), length(counts), prob = c("T"=.1, "F"=.9), replace = TRUE)] <- 0
+  counts[sample(c(T, F), length(counts), prob = c("T" = .1, "F" = .9), replace = TRUE)] <- 0
   counts[,1:4] <- counts[,1:4] + 10
 
   sink("/dev/null")
