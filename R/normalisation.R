@@ -52,7 +52,7 @@ normalise_filter_counts <- function(
 
   counts <- round(counts)
 
-  sce <- SingleCellExperiment::SingleCellExperiment(list(counts = Matrix::t(counts)))
+  sce <- SingleCellExperiment::SingleCellExperiment(assays = list(counts = Matrix::t(counts)))
 
   mitochondrial <- grepl("^(mt|MT|Mt)-", rownames(sce))
   has_mito <- any(mitochondrial)
