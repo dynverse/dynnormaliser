@@ -27,7 +27,7 @@ Imports:
   testthat,
   tibble,
   tidyr,
-  scater,
+  scater (>= 1.8),
   scran,
   stats,
   KernSmooth
