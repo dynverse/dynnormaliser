@@ -78,9 +78,9 @@ normalise_filter_counts <- function(
 
   if (verbose) {
     graphics::par(mfrow = c(1,2))
-    graphics::hist(sce$total_counts/1e6, xlab = "Library sizes (millions)", main = "",
+    graphics::hist(sce$scater_qc$feature_control$total_counts/1e6, xlab = "Library sizes (millions)", main = "",
                    breaks = 20, col = "grey80", ylab = "Number of cells")
-    graphics::hist(sce$total_features, xlab = "Number of expressed genes", main = "",
+    graphics::hist(sce$scater_qc$feature_control$total_features_by_counts, xlab = "Number of expressed genes", main = "",
                    breaks = 20, col = "grey80", ylab = "Number of cells")
     graphics::par(mfrow = c(1, 1))
     normalisation_plots$library <- grDevices::recordPlot()
@@ -88,13 +88,13 @@ normalise_filter_counts <- function(
 
   if (verbose) {
     graphics::par(mfrow = c(2,2), mar = c(5.1, 4.1, 0.1, 0.1))
-    graphics::hist(sce$total_counts/1e6, xlab = "Library sizes (millions)", main = "",
+    graphics::hist(sce$scater_qc$feature_control$total_counts/1e6, xlab = "Library sizes (millions)", main = "",
                    breaks = 20, col = "grey80", ylab = "Number of cells")
-    graphics::hist(sce$total_features, xlab = "Number of expressed genes", main = "",
+    graphics::hist(sce$scater_qc$feature_control$total_features_by_counts, xlab = "Number of expressed genes", main = "",
                    breaks = 20, col = "grey80", ylab = "Number of cells")
-    if (has_spike) graphics::hist(sce$pct_counts_ERCC, xlab = "ERCC proportion (%)",
+    if (has_spike) graphics::hist(sce$scater_qc$feature_control_ERCC$pct_counts, xlab = "ERCC proportion (%)",
                                   ylab = "Number of cells", breaks = 20, main = "", col = "grey80")
-    if (has_mito) graphics::hist(sce$pct_counts_Mt, xlab = "Mitochondrial proportion (%)",
+    if (has_mito) graphics::hist(sce$scater_qc$feature_control_Mt$pct_counts, xlab = "Mitochondrial proportion (%)",
                                  ylab = "Number of cells", breaks = 20, main = "", col = "grey80")
     graphics::par(mfrow = c(1, 1))
     normalisation_plots$cell_quality <- grDevices::recordPlot()
@@ -186,7 +186,7 @@ normalise_filter_counts <- function(
   sce <- sce[, BiocGenerics::sizeFactors(sce) > 0] # as mentioned in the scran documentation, ensure that size factors are higher than 0
 
   if (verbose) {
-    graphics::plot(sizeFactors(sce), sce$total_counts/1e6, log = "xy",
+    graphics::plot(sizeFactors(sce), sce$scater_qc$feature_control$total_counts/1e6, log = "xy",
                    ylab = "Library size (millions)", xlab = "Size factor")
     normalisation_plots$size_factor <- grDevices::recordPlot()
   }
