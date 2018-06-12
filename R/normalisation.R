@@ -56,7 +56,9 @@ normalise_filter_counts <- function(
 
   mitochondrial <- grepl("^(mt|MT|Mt)-", rownames(sce))
   has_mito <- any(mitochondrial)
+  #feature_controls <- list(dummy = rep(FALSE, nrow(sce)) %>% set_names(rownames(sce)))
   feature_controls <- list()
+
   if (has_mito) feature_controls$Mt <- mitochondrial
   if (has_spike) feature_controls$ERCC <- grepl("^ERCC", rownames(sce))
 
@@ -65,7 +67,10 @@ normalise_filter_counts <- function(
   if (has_spike) {
     is_spike <- grepl("^ERCC", rownames(sce))
     SingleCellExperiment::isSpike(sce, "ERCC") <- is_spike
-    summary(is_spike)
+  }
+
+  if (!has_mito && !has_spike) {
+    sce$scater_qc$feature_control <- sce$scater_qc$all
   }
 
   if (verbose) {
