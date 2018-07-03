@@ -4,14 +4,22 @@
 \alias{normalise_filter_counts}
 \title{State-of-the-art preprocessing and normalisation}
 \usage{
-normalise_filter_counts(counts, has_spike = any(grepl("^ERCC",
-  colnames(counts))), verbose = FALSE, nmads = 3,
-  expressed_in_n_cells = 0.05, min_ave_expression = 0.05,
-  filter_hvg = TRUE, hvg_fdr = 0.05, hvg_bio = 0.5,
-  min_variable_fraction = 0.1)
+normalise_filter_counts(counts, filter_cells = TRUE, filter_genes = TRUE,
+  filter_hvg = TRUE, normalisation = "scran_size_factors",
+  has_spike = any(grepl("^ERCC", colnames(counts))), verbose = FALSE,
+  nmads = 3, expressed_in_n_cells = 0.05, min_ave_expression = 0.05,
+  hvg_fdr = 0.05, hvg_bio = 0.5, min_variable_fraction = 0.1)
 }
 \arguments{
 \item{counts}{The counts matrix, with genes in columns}
+
+\item{filter_cells}{Whether the cells have to be filtered}
+
+\item{filter_genes}{Whether the genes have to be filtered}
+
+\item{filter_hvg}{Whether to filter on highly variable genes}
+
+\item{normalisation}{How to normalise}
 
 \item{has_spike}{Does this contain spike-ins, for which the gene names are preseded by ERCC}
 
@@ -22,8 +30,6 @@ normalise_filter_counts(counts, has_spike = any(grepl("^ERCC",
 \item{expressed_in_n_cells}{Percentage of minimal number of cells a gene has to be expressed}
 
 \item{min_ave_expression}{Minimal average expression of a gene}
-
-\item{filter_hvg}{Whether to filter out highly variable genes}
 
 \item{hvg_fdr}{FDR gene filtering cutoff}
 

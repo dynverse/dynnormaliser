@@ -5,12 +5,15 @@
 #' Based on \url{https://f1000research.com/articles/5-2122/v2} and \url{https://www.bioconductor.org/help/workflows/simpleSingleCell/}.
 #'
 #' @param counts The counts matrix, with genes in columns
+#' @param filter_cells Whether the cells have to be filtered
+#' @param filter_genes Whether the genes have to be filtered
+#' @param filter_hvg Whether to filter on highly variable genes
+#' @param normalisation How to normalise
 #' @param has_spike Does this contain spike-ins, for which the gene names are preseded by ERCC
 #' @param verbose Whether to add plots
 #' @param nmads Number of median deviations for filtering outlier cells
 #' @param expressed_in_n_cells Percentage of minimal number of cells a gene has to be expressed
 #' @param min_ave_expression Minimal average expression of a gene
-#' @param filter_hvg Whether to filter out highly variable genes
 #' @param hvg_fdr FDR gene filtering cutoff
 #' @param hvg_bio Biological gene filtering cutoff
 #' @param min_variable_fraction Minimal number of variable genes to retain
@@ -27,12 +30,15 @@
 #' @export
 normalise_filter_counts <- function(
   counts,
+  filter_cells = TRUE,
+  filter_genes = TRUE,
+  filter_hvg = TRUE,
+  normalisation = "scran_size_factors",
   has_spike = any(grepl("^ERCC", colnames(counts))),
   verbose = FALSE,
   nmads = 3,
   expressed_in_n_cells = 0.05,
   min_ave_expression = 0.05,
-  filter_hvg = TRUE,
   hvg_fdr = 0.05,
   hvg_bio = 0.5,
   min_variable_fraction = 0.1
@@ -55,14 +61,18 @@ normalise_filter_counts <- function(
   sce <- SingleCellExperiment::SingleCellExperiment(assays = list(counts = Matrix::t(counts)))
 
   mitochondrial <- grepl("^(mt|MT|Mt)-", rownames(sce))
-  has_mito <- any(mitochondrial)
-  #feature_controls <- list(dummy = rep(FALSE, nrow(sce)) %>% set_names(rownames(sce)))
+  has_mito <- any(mitochondrial) && FALSE
+
   feature_controls <- list()
 
   if (has_mito) feature_controls$Mt <- mitochondrial
   if (has_spike) feature_controls$ERCC <- grepl("^ERCC", rownames(sce))
 
-  sce <- scater::calculateQCMetrics(sce, feature_controls = feature_controls, compact = TRUE)
+  sce <- scater::calculateQCMetrics(
+    sce,
+    feature_controls = feature_controls,
+    compact = TRUE
+  )
 
   if (has_spike) {
     is_spike <- grepl("^ERCC", rownames(sce))
@@ -83,9 +93,9 @@ normalise_filter_counts <- function(
 
   if (verbose) {
     graphics::par(mfrow = c(1,2))
-    graphics::hist(sce$scater_qc$feature_control$total_counts/1e6, xlab = "Library sizes (millions)", main = "",
+    graphics::hist(sce$scater_qc$all$total_counts/1e6, xlab = "Library sizes (millions)", main = "",
                    breaks = 20, col = "grey80", ylab = "Number of cells")
-    graphics::hist(sce$scater_qc$feature_control$total_features_by_counts, xlab = "Number of expressed genes", main = "",
+    graphics::hist(sce$scater_qc$all$total_features_by_counts, xlab = "Number of expressed genes", main = "",
                    breaks = 20, col = "grey80", ylab = "Number of cells")
     graphics::par(mfrow = c(1, 1))
     normalisation_plots$library <- grDevices::recordPlot()
@@ -93,9 +103,9 @@ normalise_filter_counts <- function(
 
   if (verbose) {
     graphics::par(mfrow = c(2,2), mar = c(5.1, 4.1, 0.1, 0.1))
-    graphics::hist(sce$scater_qc$feature_control$total_counts/1e6, xlab = "Library sizes (millions)", main = "",
+    graphics::hist(sce$scater_qc$all$total_counts/1e6, xlab = "Library sizes (millions)", main = "",
                    breaks = 20, col = "grey80", ylab = "Number of cells")
-    graphics::hist(sce$scater_qc$feature_control$total_features_by_counts, xlab = "Number of expressed genes", main = "",
+    graphics::hist(sce$scater_qc$all$total_features_by_counts, xlab = "Number of expressed genes", main = "",
                    breaks = 20, col = "grey80", ylab = "Number of cells")
     if (has_spike) graphics::hist(sce$scater_qc$feature_control_ERCC$pct_counts, xlab = "ERCC proportion (%)",
                                   ylab = "Number of cells", breaks = 20, main = "", col = "grey80")
@@ -108,102 +118,111 @@ normalise_filter_counts <- function(
   ########################################
   # Filter cells
   ########################################
-  total_counts <- sce$scater_qc$all$log10_total_counts
-  total_features <- sce$scater_qc$all$log10_total_features_by_counts
-  pct_counts_Mt <- sce$scater_qc$feature_control_Mt$pct_counts
-  pct_counts_ERCC <- sce$scater_qc$feature_control_ERCC$pct_counts
 
-  mito_drop <- rep(FALSE, length(total_counts))
-  spike_drop <- rep(FALSE, length(total_counts))
+  if (filter_cells) {
+    total_counts <- sce$scater_qc$all$log10_total_counts
+    total_features <- sce$scater_qc$all$log10_total_features_by_counts
+    pct_counts_Mt <- sce$scater_qc$feature_control_Mt$pct_counts
+    pct_counts_ERCC <- sce$scater_qc$feature_control_ERCC$pct_counts
 
-  libsize_drop <- scater::isOutlier(total_counts, nmads = nmads, type = "lower", log = TRUE)
-  feature_drop <- scater::isOutlier(total_features, nmads = nmads, type = "lower", log = TRUE)
-  if (has_mito) mito_drop <- scater::isOutlier(pct_counts_Mt, nmads = nmads, type = "higher")
-  if (has_spike) spike_drop <- scater::isOutlier(pct_counts_ERCC, nmads = nmads, type = "higher")
+    mito_drop <- rep(FALSE, length(total_counts))
+    spike_drop <- rep(FALSE, length(total_counts))
 
-  if (verbose) {
-    tibble(sum(mito_drop), sum(spike_drop), sum(libsize_drop), sum(feature_drop)) %>% print()
-  }
+    libsize_drop <- scater::isOutlier(total_counts, nmads = nmads, type = "lower", log = TRUE)
+    feature_drop <- scater::isOutlier(total_features, nmads = nmads, type = "lower", log = TRUE)
+    if (has_mito) mito_drop <- scater::isOutlier(pct_counts_Mt, nmads = nmads, type = "higher")
+    if (has_spike) spike_drop <- scater::isOutlier(pct_counts_ERCC, nmads = nmads, type = "higher")
 
-  sce <- sce[,!(libsize_drop | feature_drop | mito_drop | spike_drop)]
+    if (verbose) {
+      tibble(sum(mito_drop), sum(spike_drop), sum(libsize_drop), sum(feature_drop)) %>% print()
+    }
 
-  if (verbose) {
-    normalisation_steps <- normalisation_steps %>%
-      add_row(type = "cell_quality_filtering", ngenes = nrow(sce), ncells = ncol(sce))
-    print(glue::glue("Cell filter: Genes - {nrow(sce)} Cells - {ncol(sce)}"))
+    sce <- sce[,!(libsize_drop | feature_drop | mito_drop | spike_drop)]
+
+    if (verbose) {
+      normalisation_steps <- normalisation_steps %>%
+        add_row(type = "cell_quality_filtering", ngenes = nrow(sce), ncells = ncol(sce))
+      print(glue::glue("Cell filter: Genes - {nrow(sce)} Cells - {ncol(sce)}"))
+    }
   }
 
   ########################################
   # Filter genes
   ########################################
 
-  ave_counts <- Matrix::rowMeans(BiocGenerics::counts(sce))
-  keep <- ave_counts >= min_ave_expression
+  if (filter_genes) {
+    ave_counts <- Matrix::rowMeans(BiocGenerics::counts(sce))
+    keep <- ave_counts >= min_ave_expression
 
-  if (verbose) {
-    fontsize <- ggplot2::theme(
-      axis.text = ggplot2::element_text(size = 12),
-      axis.title = ggplot2::element_text(size = 16)
-    )
+    if (verbose) {
+      fontsize <- ggplot2::theme(
+        axis.text = ggplot2::element_text(size = 12),
+        axis.title = ggplot2::element_text(size = 16)
+      )
 
-    graphics::hist(log10(ave_counts), breaks = 100, main = "", col = "grey80",
-                   xlab = expression(Log[10]~"average count"))
-    graphics::abline(v = log10(min_ave_expression), col = "blue", lwd = 2, lty = 2)
-    normalisation_plots$initial_gene_filter <- grDevices::recordPlot()
+      graphics::hist(log10(ave_counts), breaks = 100, main = "", col = "grey80",
+                     xlab = expression(Log[10]~"average count"))
+      graphics::abline(v = log10(min_ave_expression), col = "blue", lwd = 2, lty = 2)
+      normalisation_plots$initial_gene_filter <- grDevices::recordPlot()
 
-    print(scater::plotQC(sce, type = "highest-expression", n = 50) + fontsize)
-    normalisation_plots$top_genes_qc <- grDevices::recordPlot()
-  }
-
-  numcells <- scater::nexprs(sce, byrow = TRUE)
-  alt_keep <- numcells >= ncol(sce) * expressed_in_n_cells
-
-  if (verbose) {
-    graphics::smoothScatter(log10(ave_counts), numcells, xlab = expression(Log[10]~"average count"), ylab = "Number of expressing cells")
-    if (has_spike) {
-      is_ercc <- SingleCellExperiment::isSpike(sce, type = "ERCC")
-      graphics::points(log10(ave_counts[is_ercc]), numcells[is_ercc], col = "red", pch = 16, cex = 0.5)
+      print(scater::plotQC(sce, type = "highest-expression", n = 50) + fontsize)
+      normalisation_plots$top_genes_qc <- grDevices::recordPlot()
     }
 
-    normalisation_plots$cell_filtering <- grDevices::recordPlot()
-  }
+    numcells <- scater::nexprs(sce, byrow = TRUE)
+    alt_keep <- numcells >= ncol(sce) * expressed_in_n_cells
 
-  sce <- sce[keep,]
+    if (verbose) {
+      graphics::smoothScatter(log10(ave_counts), numcells, xlab = expression(Log[10]~"average count"), ylab = "Number of expressing cells")
+      if (has_spike) {
+        is_ercc <- SingleCellExperiment::isSpike(sce, type = "ERCC")
+        graphics::points(log10(ave_counts[is_ercc]), numcells[is_ercc], col = "red", pch = 16, cex = 0.5)
+      }
 
-  if (verbose) {
-    normalisation_steps <- normalisation_steps %>%
-      add_row(type = "gene_expression_filtering", ngenes = nrow(sce), ncells = ncol(sce))
-    print(glue::glue("Gene filter: Genes - {nrow(sce)} Cells - {ncol(sce)}"))
+      normalisation_plots$cell_filtering <- grDevices::recordPlot()
+    }
+
+    if (verbose) {
+      normalisation_steps <- normalisation_steps %>%
+        add_row(type = "gene_expression_filtering", ngenes = nrow(sce), ncells = ncol(sce))
+      print(glue::glue("Gene filter: Genes - {nrow(sce)} Cells - {ncol(sce)}"))
+    }
+
+    sce <- sce[keep,]
   }
 
   ########################################
   # Normalise
   ########################################
 
-  if (ncol(sce) >= 100) {
-    # sizes <- c(20, 40, 60, 80)
-    sizes <- ncol(sce) / 10
-  } else {
-    sizes <- ncol(sce)
-  }
-
-  sce <- scran::computeSumFactors(sce, sizes = sizes, positive = TRUE)
-  sce <- sce[, BiocGenerics::sizeFactors(sce) > 0] # as mentioned in the scran documentation, ensure that size factors are higher than 0
-
-  if (verbose) {
-    graphics::plot(sizeFactors(sce), sce$scater_qc$feature_control$total_counts/1e6, log = "xy",
-                   ylab = "Library size (millions)", xlab = "Size factor")
-    normalisation_plots$size_factor <- grDevices::recordPlot()
-  }
-
-  if(has_spike) {
-    sce <- scran::computeSpikeFactors(sce, type = "ERCC", general.use = FALSE)
-    if(any(is.na(sizeFactors(sce, type = "ERCC")))) {
-      warning("Some cells do not have any spike-ins, this will cause an error further away. Remove spike-ins.")
+  if (normalisation == "scran_size_factors") {
+    if (ncol(sce) >= 100) {
+      # sizes <- c(20, 40, 60, 80)
+      sizes <- ncol(sce) / 100
+    } else {
+      sizes <- ncol(sce)
     }
-  }
 
-  sce <- scater::normalise(sce)
+    sce <- scran::computeSumFactors(sce, sizes = sizes, positive = TRUE)
+    sce <- sce[, BiocGenerics::sizeFactors(sce) > 0] # as mentioned in the scran documentation, ensure that size factors are higher than 0
+
+    if (verbose) {
+      graphics::plot(sizeFactors(sce), sce$scater_qc$feature_control$total_counts/1e6, log = "xy",
+                     ylab = "Library size (millions)", xlab = "Size factor")
+      normalisation_plots$size_factor <- grDevices::recordPlot()
+    }
+
+    if(has_spike) {
+      sce <- scran::computeSpikeFactors(sce, type = "ERCC", general.use = FALSE)
+      if(any(is.na(sizeFactors(sce, type = "ERCC")))) {
+        warning("Some cells do not have any spike-ins, this will cause an error further away. Remove spike-ins.")
+      }
+    }
+
+    sce <- scater::normalise(sce)
+  } else {
+    stop("Normalisation not supported")
+  }
 
   if (verbose) {
     normalisation_steps <- normalisation_steps %>%
