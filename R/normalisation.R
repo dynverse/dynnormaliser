@@ -198,7 +198,7 @@ normalise_filter_counts <- function(
   if (normalisation == "scran_size_factors") {
     if (ncol(sce) >= 100) {
       # sizes <- c(20, 40, 60, 80)
-      sizes <- ncol(sce) / 100
+      sizes <- ncol(sce) / 5
     } else {
       sizes <- ncol(sce)
     }
