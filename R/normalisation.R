@@ -24,6 +24,7 @@
 #' @importFrom limSolve lsei
 #' @importFrom stats sd
 #' @importFrom aroma.light aroma.light
+#' @importFrom reshape2 melt
 #' @export
 normalise_filter_counts <- function(
   counts,

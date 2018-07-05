@@ -23,6 +23,7 @@ Imports:
   Matrix,
   methods,
   purrr,
+  reshape2,
   SingleCellExperiment,
   testthat,
   tibble,
