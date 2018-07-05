@@ -4,38 +4,36 @@
 \alias{normalise_filter_counts}
 \title{State-of-the-art preprocessing and normalisation}
 \usage{
-normalise_filter_counts(counts, filter_cells = TRUE, filter_genes = TRUE,
+normalise_filter_counts(counts, filter_cells = TRUE, filter_features = TRUE,
   filter_hvg = TRUE, normalisation = "scran_size_factors",
   has_spike = any(grepl("^ERCC", colnames(counts))), verbose = FALSE,
-  nmads = 3, expressed_in_n_cells = 0.05, min_ave_expression = 0.05,
-  hvg_fdr = 0.05, hvg_bio = 0.5, min_variable_fraction = 0.1)
+  nmads = 3, min_ave_expression = 0.02, hvg_fdr = 0.05, hvg_bio = 0.5,
+  min_variable_fraction = 0.1)
 }
 \arguments{
-\item{counts}{The counts matrix, with genes in columns}
+\item{counts}{The counts matrix, with features in columns}
 
 \item{filter_cells}{Whether the cells have to be filtered}
 
-\item{filter_genes}{Whether the genes have to be filtered}
+\item{filter_features}{Whether the features have to be filtered}
 
-\item{filter_hvg}{Whether to filter on highly variable genes}
+\item{filter_hvg}{Whether to filter on highly variable features}
 
 \item{normalisation}{How to normalise}
 
-\item{has_spike}{Does this contain spike-ins, for which the gene names are preseded by ERCC}
+\item{has_spike}{Does this contain spike-ins, for which the feature names are preseded by ERCC}
 
 \item{verbose}{Whether to add plots}
 
 \item{nmads}{Number of median deviations for filtering outlier cells}
 
-\item{expressed_in_n_cells}{Percentage of minimal number of cells a gene has to be expressed}
+\item{min_ave_expression}{Minimal average expression of a feature}
 
-\item{min_ave_expression}{Minimal average expression of a gene}
+\item{hvg_fdr}{FDR feature filtering cutoff}
 
-\item{hvg_fdr}{FDR gene filtering cutoff}
+\item{hvg_bio}{Biological feature filtering cutoff}
 
-\item{hvg_bio}{Biological gene filtering cutoff}
-
-\item{min_variable_fraction}{Minimal number of variable genes to retain}
+\item{min_variable_fraction}{Minimal number of variable features to retain}
 }
 \description{
 Based on \url{https://f1000research.com/articles/5-2122/v2} and \url{https://www.bioconductor.org/help/workflows/simpleSingleCell/}.
