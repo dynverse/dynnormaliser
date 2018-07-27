@@ -57,6 +57,10 @@ normalise_filter_counts <- function(
   # convert to integer
   counts <- floor(counts)
 
+  # filter zero cells
+  counts <- counts[apply(counts, 1, max) > 0, ]
+
+  # create object
   sce <- SingleCellExperiment::SingleCellExperiment(assays = list(counts = Matrix::t(counts)))
 
   # mitochondrial
