@@ -60,6 +60,10 @@ normalise_filter_counts <- function(
   # filter zero cells
   counts <- counts[apply(counts, 1, max) > 0, ]
 
+  if (nrow(counts) == 0) {
+    stop("All counts are zero!")
+  }
+
   # create object
   sce <- SingleCellExperiment::SingleCellExperiment(assays = list(counts = Matrix::t(counts)))
 
@@ -211,7 +215,7 @@ normalise_filter_counts <- function(
     }
 
     if (cor(sce$scater_qc$all$total_counts, sizeFactors(sce)) < 0.5) {
-      warning("Low correlation between sumFactors and total_counts, falling back to scater::librarySizeFactors")
+      # warning("Low correlation between sumFactors and total_counts, falling back to scater::librarySizeFactors")
       SingleCellExperiment::sizeFactors(sce) <- scater::librarySizeFactors(sce)
     }
 
