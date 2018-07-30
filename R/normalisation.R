@@ -269,8 +269,10 @@ normalise_filter_counts <- function(
 
     var_out <- var_out[order(var_out$bio, decreasing = TRUE),]
     hvg_out <- var_out[which(var_out$FDR <= hvg_fdr & var_out$bio >= hvg_bio),]
-    if(nrow(hvg_out) < min_variable_fraction * nrow(var_out)) {
-      hvg_out <- var_out[seq(1, ceiling(min_variable_fraction * nrow(var_out))), ]
+    if(nrow(hvg_out) < min_variable_fraction * ncol(counts)) {
+      n_features <- min(nrow(var_out), ceiling(min_variable_fraction * ncol(counts)))
+
+      hvg_out <- var_out[seq(1, n_features), ]
     }
 
     sce <- sce[rownames(hvg_out),]
