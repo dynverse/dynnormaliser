@@ -38,7 +38,7 @@ normalise_filter_counts <- function(
   min_ave_expression = 0.02,
   hvg_fdr = 0.05,
   hvg_bio = 0.5,
-  min_variable_fraction = 0.1
+  min_variable_fraction = 0.15
 ) {
   if (verbose) {
     requireNamespace("grDevices")
@@ -57,6 +57,14 @@ normalise_filter_counts <- function(
   # convert to integer
   counts <- floor(counts)
 
+  # filter zero cells
+  counts <- counts[apply(counts, 1, max) > 0, ]
+
+  if (nrow(counts) == 0) {
+    stop("All counts are zero!")
+  }
+
+  # create object
   sce <- SingleCellExperiment::SingleCellExperiment(assays = list(counts = Matrix::t(counts)))
 
   # mitochondrial
@@ -207,7 +215,7 @@ normalise_filter_counts <- function(
     }
 
     if (cor(sce$scater_qc$all$total_counts, sizeFactors(sce)) < 0.5) {
-      warning("Low correlation between sumFactors and total_counts, falling back to scater::librarySizeFactors")
+      # warning("Low correlation between sumFactors and total_counts, falling back to scater::librarySizeFactors")
       SingleCellExperiment::sizeFactors(sce) <- scater::librarySizeFactors(sce)
     }
 
@@ -261,8 +269,10 @@ normalise_filter_counts <- function(
 
     var_out <- var_out[order(var_out$bio, decreasing = TRUE),]
     hvg_out <- var_out[which(var_out$FDR <= hvg_fdr & var_out$bio >= hvg_bio),]
-    if(nrow(hvg_out) < min_variable_fraction * nrow(var_out)) {
-      hvg_out <- var_out[seq(1, ceiling(min_variable_fraction * nrow(var_out))), ]
+    if(nrow(hvg_out) < min_variable_fraction * ncol(counts)) {
+      n_features <- min(nrow(var_out), ceiling(min_variable_fraction * ncol(counts)))
+
+      hvg_out <- var_out[seq(1, n_features), ]
     }
 
     sce <- sce[rownames(hvg_out),]
