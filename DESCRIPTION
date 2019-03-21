@@ -1,7 +1,7 @@
 Package: dynnormaliser
 Type: Package
 Title: Helper function for normalising counts data
-Version: 0.1.0
+Version: 0.9.9
 Authors@R: c(
   person("Robrecht", "Cannoodt", email = "rcannood@gmail.com", role = c("aut", "cre")),
   person("Wouter", "Saelens", email = "wouter.saelens@ugent.be", role = c("aut")))
