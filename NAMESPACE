@@ -3,7 +3,6 @@
 export(normalise_filter_counts)
 import(dplyr)
 import(ggplot2)
-import(methods)
 import(tibble)
 import(tidyr)
 importFrom(Matrix,rowMeans)

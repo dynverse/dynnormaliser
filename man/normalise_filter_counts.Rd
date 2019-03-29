@@ -4,10 +4,11 @@
 \alias{normalise_filter_counts}
 \title{State-of-the-art preprocessing and normalisation}
 \usage{
-normalise_filter_counts(counts, filter_cells = TRUE, filter_features = TRUE,
-  filter_hvg = TRUE, normalisation = "scran_size_factors",
-  has_spike = any(grepl("^ERCC", colnames(counts))), verbose = FALSE,
-  nmads = 3, min_ave_expression = 0.02, hvg_fdr = 0.05, hvg_bio = 0.5,
+normalise_filter_counts(counts, filter_cells = TRUE,
+  filter_features = TRUE, filter_hvg = TRUE,
+  normalisation = "scran_size_factors", has_spike = any(grepl("^ERCC",
+  colnames(counts))), verbose = FALSE, nmads = 3,
+  min_ave_expression = 0.02, hvg_fdr = 0.05, hvg_bio = 0.5,
   min_variable_fraction = 0.15)
 }
 \arguments{

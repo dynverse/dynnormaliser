@@ -41,9 +41,7 @@ normalise_filter_counts <- function(
   min_variable_fraction = 0.15
 ) {
   if (verbose) {
-    requireNamespace("grDevices")
     requireNamespace("ggplot2")
-    requireNamespace("graphics")
     requireNamespace("KernSmooth")
   }
 
@@ -97,7 +95,7 @@ normalise_filter_counts <- function(
       ~type, ~nfeatures, ~ncells,
       "original", nrow(sce), ncol(sce)
     )
-    print(glue::glue("Original: features - {nrow(sce)} Cells - {ncol(sce)}"))
+    cat("Original: features - ", nrow(sce), " Cells - ", ncol(sce), sep = "")
 
     normalisation_plots$library <-
       ggplot(as.data.frame(sce$scater_qc$all)) +
@@ -147,7 +145,7 @@ normalise_filter_counts <- function(
     if (verbose) {
       normalisation_steps <- normalisation_steps %>%
         add_row(type = "cell_quality_filtering", nfeatures = nrow(sce), ncells = ncol(sce))
-      print(glue::glue("Cell filter: features - {nrow(sce)} Cells - {ncol(sce)}"))
+      cat("Cell filter: features - ", nrow(sce), " Cells - ", ncol(sce), sep = "")
     }
   }
 
@@ -169,7 +167,8 @@ normalise_filter_counts <- function(
         geom_vline(xintercept = min_ave_expression)
 
       top_features <- ave_counts %>% sort() %>% tail(20) %>% names()
-      counts_top_features <- SingleCellExperiment::counts(sce[top_features]) %>%
+      counts_top_features <-
+        SingleCellExperiment::counts(sce[top_features]) %>%
         reshape2::melt(varnames = c("feature", "cell"), value.name = "count") %>%
         dplyr::mutate(feature = factor(feature, levels = top_features))
 
@@ -186,7 +185,7 @@ normalise_filter_counts <- function(
 
       normalisation_steps <- normalisation_steps %>%
         add_row(type = "feature_expression_filtering", nfeatures = nrow(sce), ncells = ncol(sce))
-      print(glue::glue("feature filter: features - {nrow(sce)} Cells - {ncol(sce)}"))
+      cat("feature filter: features - ", nrow(sce), " Cells - ", ncol(sce), sep = "")
     }
   }
 
@@ -237,7 +236,7 @@ normalise_filter_counts <- function(
   if (verbose) {
     normalisation_steps <- normalisation_steps %>%
       add_row(type = "normalisation", nfeatures = nrow(sce), ncells = ncol(sce))
-    print(glue::glue("Normalised: features - {nrow(sce)} Cells - {ncol(sce)}"))
+    cat("Normalised: features - ", nrow(sce), " Cells - ", ncol(sce), sep = "")
   }
 
   ########################################
@@ -280,7 +279,7 @@ normalise_filter_counts <- function(
     if (verbose) {
       normalisation_steps <- normalisation_steps %>%
         add_row(type = "feature_variability_filtering", nfeatures = nrow(sce), ncells = ncol(sce))
-      print(glue::glue("Variable features filtered: features - {nrow(sce)} Cells - {ncol(sce)}"))
+      cat("Variable features filtered: features - ", nrow(sce), " Cells - ", ncol(sce), sep = "")
     }
   }
 
@@ -307,7 +306,7 @@ normalise_filter_counts <- function(
   if (verbose) {
     normalisation_steps <- normalisation_steps %>%
       add_row(type = "final_filtering", nfeatures = ncol(expr_norm_filt), ncells = nrow(expr_norm_filt))
-    print(glue::glue("Final filtering: features - {ncol(expr_norm_filt)} Cells - {nrow(expr_norm_filt)}"))
+    cat("Final filtering: features - ", ncol(expr_norm_filt), " Cells - ", nrow(expr_norm_filt), sep = "")
   }
 
   ########################################
