@@ -41,9 +41,7 @@ normalise_filter_counts <- function(
   min_variable_fraction = 0.15
 ) {
   if (verbose) {
-    requireNamespace("grDevices")
     requireNamespace("ggplot2")
-    requireNamespace("graphics")
     requireNamespace("KernSmooth")
   }
 

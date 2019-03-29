@@ -8,7 +8,7 @@ Authors@R: c(
 Description: Providing a common library with helper functions for normalising counts data.
 License: GPL-3
 LazyData: TRUE
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
 Depends:
   R (>= 3.0.0)
 Imports: 
@@ -17,22 +17,17 @@ Imports:
   BiocGenerics,
   ggplot2,
   dplyr,
-  glue,
   limSolve,
   magrittr,
   Matrix,
-  methods,
   purrr,
   reshape2,
   SingleCellExperiment,
-  testthat,
   tibble,
   tidyr,
   scater (>= 1.8),
   scran,
   stats,
   KernSmooth
-Suggested:
-  cowplot,
-  graphics,
-  grDevices
+Suggests:
+  testthat
