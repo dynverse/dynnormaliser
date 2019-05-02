@@ -18,7 +18,7 @@
 #' @param min_variable_fraction Minimal number of variable features to retain
 #'
 #' @importFrom Matrix t rowMeans
-#' @importFrom scater calculateQCMetrics isOutlier normalise
+#' @importFrom scater calculateQCMetrics isOutlier normalize
 #' @importFrom SingleCellExperiment isSpike SingleCellExperiment counts sizeFactors logcounts
 #' @importFrom scran computeSumFactors computeSpikeFactors trendVar decomposeVar
 #' @importFrom limSolve lsei
@@ -218,7 +218,7 @@ normalise_filter_counts <- function(
       SingleCellExperiment::sizeFactors(sce) <- scater::librarySizeFactors(sce)
     }
 
-    sce <- scater::normalise(sce)
+    sce <- scater::normalize(sce)
 
     if (verbose) {
       normalisation_plots$size_factors <- tibble(
