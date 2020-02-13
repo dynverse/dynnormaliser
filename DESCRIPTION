@@ -33,3 +33,9 @@ Imports:
   KernSmooth
 Suggests:
   testthat
+Remotes:
+  bioc::release/aroma.light,
+  bioc::release/Biobase,
+  bioc::release/BiocGenerics,
+  bioc::release/SingleCellExperiment,
+  bioc::release/scater
