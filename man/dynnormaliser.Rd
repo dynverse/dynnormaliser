@@ -3,4 +3,7 @@
 \docType{package}
 \name{dynnormaliser}
 \alias{dynnormaliser}
-\title{Helper functions}
+\title{Helper functions for normalisation}
+\description{
+Normalisation
+}
