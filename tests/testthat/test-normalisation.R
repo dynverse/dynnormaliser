@@ -8,7 +8,6 @@ test_that("Testing normalise function", {
   num_cells <- 1000
 
   gene_ids <- paste0("Gene", seq_len(num_genes))
-  gene_ids[1:4] <- paste0("ERCC", seq_len(4))
   gene_ids[5:8] <- paste0("Mt-", seq_len(4))
   cell_ids <- paste0("Cell", seq_len(num_cells))
 
@@ -20,7 +19,6 @@ test_that("Testing normalise function", {
   pdf(tmpfile)
   normd <- normalise_filter_counts(
     counts = counts,
-    has_spike = any(grepl("^ERCC", colnames(counts))),
     verbose = TRUE,
     nmads = 3,
     min_ave_expression = 0.05,
@@ -39,7 +37,7 @@ test_that("Testing normalise function", {
 
 
 
-test_that("Also test for when there are no ERCC or Mt genes", {
+test_that("Also test for when there are no Mt genes", {
   num_genes <- 1000
   num_cells <- 1000
 
@@ -54,7 +52,6 @@ test_that("Also test for when there are no ERCC or Mt genes", {
   pdf(tmpfile)
   normd <- normalise_filter_counts(
     counts = counts,
-    has_spike = any(grepl("^ERCC", colnames(counts))),
     verbose = TRUE,
     nmads = 3,
     min_ave_expression = 0.05,
