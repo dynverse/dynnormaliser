@@ -18,14 +18,7 @@ test_that("Testing normalise function", {
   sink(tmpfile)
   pdf(tmpfile)
   normd <- normalise_filter_counts(
-    counts = counts,
-    verbose = TRUE,
-    nmads = 3,
-    min_ave_expression = 0.05,
-    filter_hvg = TRUE,
-    hvg_fdr = 0.05,
-    hvg_bio = 0.5,
-    min_variable_fraction = 0.1
+    counts = counts
   )
   dev.off()
   sink()
@@ -51,14 +44,7 @@ test_that("Also test for when there are no Mt genes", {
   sink(tmpfile)
   pdf(tmpfile)
   normd <- normalise_filter_counts(
-    counts = counts,
-    verbose = TRUE,
-    nmads = 3,
-    min_ave_expression = 0.05,
-    filter_hvg = TRUE,
-    hvg_fdr = 0.05,
-    hvg_bio = 0.5,
-    min_variable_fraction = 0.1
+    counts = counts
   )
   dev.off()
   sink()
